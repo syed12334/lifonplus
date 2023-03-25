@@ -1,0 +1,1 @@
+<footer class="footer">©2021. All Rights Reserved. Lifeon+</footer>

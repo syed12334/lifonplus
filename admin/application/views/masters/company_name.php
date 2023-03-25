@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <!-- Tell the browser to be responsive to screen width -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <!-- Favicon icon -->
+        <?php echo $style;?>
+        <title><?php echo title;?></title>
+        <!-- This page plugin CSS -->
+        <link href="<?=asset_url()?>css/dataTables.bootstrap4.css" rel="stylesheet">
+        <!-- Custom CSS -->
+        <link href="<?=asset_url()?>css/style.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="<?=asset_url()?>select2/dist/css/select2.min.css">
+    </head>
+    <body>
+        <!-- ============================================================== -->
+        <!-- Preloader - style you can find in spinners.css -->
+        <!-- ============================================================== -->
+        <div class="preloader">
+            <div class="lds-ripple">
+                <div class="lds-pos"></div>
+                <div class="lds-pos"></div>
+            </div>
+        </div>
+        <!-- ============================================================== -->
+        <!-- Main wrapper - style you can find in pages.scss -->
+        <!-- ============================================================== -->
+        <div id="main-wrapper">
+            <?=$header?>
+            <?=$leftmain?>
+            <!-- Page wrapper  -->
+            <!-- ============================================================== -->
+            <div class="page-wrapper">
+                <!-- ============================================================== -->
+                <!-- Bread crumb and right sidebar toggle -->
+                <!-- ============================================================== -->
+                <div class="row page-titles">
+                    <div class="col-md-5 col-12 align-self-center">
+                        <h3 class="text-themecolor mb-0">Company Name</h3>
+                        <ol class="breadcrumb mb-0 p-0 bg-transparent">
+                            <li class="breadcrumb-item"><a href="<?=base_url()?>">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Company Name</li>
+                        </ol>
+                    </div>
+                </div>
+                <!-- Container fluid  -->
+                <!-- ============================================================== -->
+                <div class="container-fluid">
+                    <!-- ============================================================== -->
+                    <!-- Start Page Content -->
+                    <!-- ============================================================== -->          
+                    <?php
+                    if( $this->session->flashdata('message') != null )
+                        echo $this->session->flashdata('message');
+                    ?>
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Company Name</h4>
+                            <!--<div class="card-tools">
+                            <button class="btn btn-success" onclick="addNew();" ><i class="fa fa-plus"></i> Add</button>
+                            </div>-->
+							
+							<hr>
+                            
+                            <table id="category_table" class="table display table-bordered table-striped no-wrap" style="width:100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Sl. No.</th>
+                                        <th>Action</th>
+                                        <th>Company Name</th>
+                                        <th>Status</th>                                        
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                            
+                        </div>
+                    </div>
+                </div>
+                <!-- End Container fluid  -->
+                <!-- footer -->
+                <?=$footer?>
+                <!-- End footer -->
+            </div>
+            <!-- End Page wrapper  -->
+        </div>
+        <!-- End Wrapper -->
+    
+        <div class="chat-windows"></div>
+        <?=$jsfile?>
+        <!--This page plugins -->
+        <script src="<?=asset_url()?>js/datatables/media/js/jquery.dataTables.min.js"></script>
+        <script src="<?=asset_url()?>js/datatable/custom-datatable.js"></script>
+        <script src="<?=asset_url()?>js/datatable/datatable-basic.init.js"></script>
+
+        <script src="<?=asset_url()?>/select2/dist/js/select2.full.min.js"></script>
+        <script src="<?=asset_url()?>/select2/dist/js/select2.min.js"></script>
+        <script src="<?=asset_url()?>select2/select2.init.js"></script>
+        
+        <script src="<?php echo asset_url();?>js/jquery.validate.min.js"></script>
+
+        <script>
+
+            var dataTable, edit_data;
+            function initialiseData(){
+                dataTable = $('#category_table').DataTable({  
+                    "processing":true,  
+                    "serverSide":true,  
+                    "searching": true,
+                    "order":[],  
+                    "ajax":{  
+                        url:"<?=base_url().'home/company_nameList'?>",  
+                        type:"POST",
+                        data: function(d){
+                            //d.form = $("#searchForm").serializeArray();
+                        },
+                        error: function(){  // error handling
+                            $(".user_data-error").html("");
+                            $("#user_data").append('<tbody class="user_data-error"><tr><th colspan="5">No data found in the server</th></tr></tbody>');
+                            $("#user_data_processing").css("display","none");
+                        }
+                    },"columnDefs":[  
+                        {  
+                            "targets":[2],  
+                            "orderable":false,  
+                        },  
+                    ],'rowCallback': function(row, data, index){
+                        //$(row).find('td:eq(3)').css('background-color', data[3]).html("");   
+                    }
+                }); 
+            }
+
+            $(document).ready(function(){ 
+                initialiseData();
+
+                var v = $("#category_form").validate({
+                
+                    errorClass: "help-block", 
+                    errorElement: 'span',
+                    onkeyup: false,
+                    onblur: true,
+                    rules: {
+                        
+                    },
+                    messages: {
+                        
+                    },
+                    onfocusout: function(element) {$(element).valid()},
+                    errorElement: 'span',
+                    highlight: function (element, errorClass, validClass) {
+                        $(element).parents('.form-group').addClass('has-error');
+                    },
+                    unhighlight: function (element, errorClass, validClass) {
+                        $(element).parents('.form-group').removeClass('has-error');
+                    }			        		    
+                });
+
+                $("#saveButton").click(function(evt){
+                    if( $.trim($('#name').val()) == '' ){
+                        Swal.fire('Enter Name');
+                        return false;
+                    }
+					if( $.trim($('#address').val()) == '' ){
+                        Swal.fire('Enter Address');
+                        return false;
+                    }
+					if( $.trim($('#phone_no').val()) == '' ){
+                        Swal.fire('Enter Phone Number');
+                        return false;
+                    }
+					if( $.trim($('#email').val()) == '' ){
+                        Swal.fire('Enter Email Id');
+                        return false;
+                    }
+					if( $.trim($('#pan_no').val()) == '' ){
+                        Swal.fire('Enter PAN Number');
+                        return false;
+                    }
+					/*if( $.trim($('#gst_no').val()) == '' ){
+                        Swal.fire('Enter GST Number');
+                        return false;
+                    }*/
+					if( $.trim($('#bank_name').val()) == '' ){
+                        Swal.fire('Enter Bank Name');
+                        return false;
+                    }
+					if( $.trim($('#account_no').val()) == '' ){
+                        Swal.fire('Enter Account Number');
+                        return false;
+                    }
+					if( $.trim($('#ifsc_code').val()) == '' ){
+                        Swal.fire('Enter IFSC Code');
+                        return false;
+                    }
+					if( $.trim($('#branch_name').val()) == '' ){
+                        Swal.fire('Enter Branch Name');
+                        return false;
+                    }
+
+                    
+
+                    Swal.fire({
+                        allowOutsideClick: false,
+                        html : '<i class="fas fa-spinner fa-spin"></i> Updating please wait...',
+                        buttons: false,
+                        showConfirmButton: false,
+                    });
+                    if(v.form()){
+                        console.log( $("#category_form").serialize() )
+					
+                        $("#msg_box").html('<div class="alert alert-warning alert-dismissable"><button class="close" aria-hidden="true" data-dismiss="alert" type="button">&times;</button>Please wait...</div>');
+                        var str = $("#category_form").serialize();
+                        
+                        $.post("<?=base_url().'home/savecompanyname'?>", str, function(data){
+							
+                            if(parseInt(data) == 1){
+                                $("#msg_box").html('<div class="alert alert-success alert-dismissable"><button class="close" aria-hidden="true" data-dismiss="alert" type="button">&times;</button>Saved Successfully. Please wait loading...</div>');
+                                window.setTimeout(function () { 
+                                    $('#addModal').modal('hide');  
+                                    $('#name').val('');
+									$('#address').val('');
+									$('#phone_no').val('');
+									$('#email').val('');
+									$('#pan_no').val('');
+									$('#gst_no').val('');
+									$('#bank_name').val('');
+									$('#account_no').val('');
+									$('#ifsc_code').val('');
+									$('#branch_name').val('');
+                                    $('#msg_box').html('');
+                                }, 1000); 
+                                $("#category_table").dataTable().fnDestroy();
+                                initialiseData();                            
+                            }else{
+                                $("#msg_box").html('<div class="alert alert-danger alert-dismissable"><button class="close" aria-hidden="true" data-dismiss="alert" type="button">&times;</button>'+data+'</div>');
+                            }
+                            Swal.close();
+                            
+                        });
+                    }
+                });
+
+                $('#resetButton').click(function(){
+                    $('#name').val('');
+					$('#cat_id').val(0);
+                    $('#address').val('');
+                    $('#phone_no').val('');
+                    $('#email').val('');
+                    $('#pan_no').val('');
+                    $('#gst_no').val('');
+                    $('#bank_name').val('');
+                    $('#account_no').val('');
+                    $('#ifsc_code').val('');
+                    $('#branch_name').val('');
+                });
+
+            });
+
+            function addNew(){
+                $('#addModal').modal('show')
+                $('#addModalLabel').html('Add Company')
+            }
+
+            function reinitialsedata(){
+                var dt = $("#category_table").DataTable();
+                dt.ajax.reload(null, false);
+            }
+
+            function updateStatus(id,status){
+                switch(status){
+                    case 1 : var msg="Are you sure,you want to activate ?";break;
+                    case 0 : var msg="Are you sure,you want to deactivate ?";break;
+                    case -1 : var msg="Are you sure,you want to delete ?";break;
+                    default : var msg=""; break;
+                }
+                    
+                Swal.fire({
+
+                    title: '',
+                    text: msg,
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Submit'
+                }).then((result) => {
+                    if (result.value) {
+                        Swal.fire({
+                            allowOutsideClick: false,
+                            html : '<i class="fas fa-spinner fa-spin"></i> Updating please wait...',
+                            buttons: false,
+                            showConfirmButton: false,
+                        })
+
+                        var postdata = { id : id,status : status } ;
+                        //console.log( postdata );
+                        $.ajax({
+                        
+                            url: "<?=base_url().'home/setcompany_nameStatus'?>",
+                            type: "post",
+                            data:  postdata ,
+                            dataType : 'json',
+                            success: function (response) {
+                                //console.log(response);
+                                if(response == '1'){
+                                    //reinitialsedata();
+                                    dataTable.ajax.reload( null, false ); 
+                                    Swal.fire("Updated Successfully");
+                                }else{
+                                    Swal.fire({
+                                        type: 'error',
+                                        title: '',
+                                        text: 'Failed try again!',
+                                    })
+                                }
+                            },
+                            error: function(jqXHR, textStatus, errorThrown) {
+                                Swal.fire({
+                                    type: 'error',
+                                    title: '',
+                                    text: 'Something went wrong!',
+                                })
+                            }
+                        });
+                    }
+                })
+            }
+
+            function modifyRow(id){
+				//alert(id);
+                console.log(id)
+                $('#addModal').modal('show')
+                $('#addModalLabel').html('Edit Company')
+
+                $.get("<?=base_url().'home/getcompany_name/'?>"+id, {id:id}, function(data){
+                    try{
+                        var json = $.parseJSON(data);
+                        console.log(json);
+                        if( json.status == 'success' ){
+                            $('#name').val(json.data.name);
+							$('#cat_id').val(json.data.id);
+							$('#address').val(json.data.address);
+							$('#phone_no').val(json.data.phone_no);
+							$('#email').val(json.data.email);
+							$('#pan_no').val(json.data.pan_no);
+							$('#gst_no').val(json.data.gst_no);
+							$('#bank_name').val(json.data.bank_name);
+							$('#account_no').val(json.data.account_no);
+							$('#ifsc_code').val(json.data.ifsc_code);
+							$('#branch_name').val(json.data.branch_name);
+                            Swal.close();
+                        }else if( json.status == 'fail' ){
+                            $('#addModal').modal('hide')
+                            Swal.fire({
+                                type: 'error',
+                                title: '',
+                                text: 'Company not found',
+                            })
+                        }
+                    }catch (err) {
+                        console.log(err);	
+                        Swal.fire({
+                            type: 'error',
+                            title: '',
+                            text: 'Something went wrong!',
+                        })			
+                    }
+                });
+            }
+
+			$(function() {
+            $('#gst_no').keyup(function() {
+                this.value = this.value.toLocaleUpperCase();
+            });
+        });
+		
+		$(function() {
+            $('#pan_no').keyup(function() {
+                this.value = this.value.toLocaleUpperCase();
+            });
+        });
+		
+		$(function() {
+            $('#ifsc_code').keyup(function() {
+                this.value = this.value.toLocaleUpperCase();
+            });
+        });
+
+        </script>
+
+            <div id="addModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header d-flex align-items-center">
+                            <h4 class="modal-title" id="addModalLabel">Modal Heading</h4>
+                            <button type="button" class="close ml-auto" data-dismiss="modal" aria-hidden="true">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="category_form">
+                                <div class="form-group">
+                                    <label for="name">Enter Company Name <font color="#FF0000">*</font></label>
+                                    <input type="text" name="name" id="name" placeholder="Company Name" class="form-control" required onkeypress="return /[0-9a-zA-Z]/i.test(event.key)" />
+                                    <input type="hidden" name="cat_id" id="cat_id" value="0" />
+                                </div>
+								
+								<div class="form-group">
+                                    <label for="address">Address <font color="#FF0000">*</font></label>
+                                    <textarea name="address" id="address" placeholder="Address Name" class="form-control" required onkeypress="return /[0-9a-zA-Z]/i.test(event.key)" /></textarea>
+                                </div>
+								
+								
+								<div class="form-group">
+                                    <label for="phone_no">Phone Number <font color="#FF0000">*</font></label>
+                                     <input type="text" name="phone_no" id="phone_no" placeholder="Phone Number" class="form-control" required>
+                                </div>
+								
+								<div class="form-group">
+                                    <label for="email">Email Id <font color="#FF0000">*</font></label>
+                                     <input type="email" name="email" id="email" placeholder="Email Id" class="form-control" required />
+                                </div>
+								
+								<div class="form-group">
+                                    <label for="pan_no">PAN Number <font color="#FF0000">*</font></label>
+                                     <input type="text" name="pan_no" id="pan_no" placeholder="PAN Number" class="form-control" required onkeypress="return /[0-9a-zA-Z]/i.test(event.key)" />
+                                </div>
+								
+								<div class="form-group">
+                                    <label for="gst_no">GST Number </label>
+                                     <input type="text" name="gst_no" id="gst_no" placeholder="GST Number" class="form-control" onkeypress="return /[0-9a-zA-Z]/i.test(event.key)" />
+                                </div>
+								
+								<div class="form-group">
+                                    <label for="bank_name">Bank Name <font color="#FF0000">*</font></label>
+                                     <input type="text" name="bank_name" id="bank_name" placeholder="Bank Name" class="form-control" required />
+                                </div>
+								
+								<div class="form-group">
+                                    <label for="account_no">Account Number <font color="#FF0000">*</font></label>
+                                     <input type="text" name="account_no" id="account_no" placeholder="Account Number" class="form-control onlynumbers" required />
+                                </div>
+								
+								<div class="form-group">
+                                    <label for="ifsc_code">IFSC Code <font color="#FF0000">*</font></label>
+                                     <input type="text" name="ifsc_code" id="ifsc_code" placeholder="IFSC Code" class="form-control" required onkeypress="return /[0-9a-zA-Z]/i.test(event.key)" />
+                                </div>
+								
+								<div class="form-group">
+                                    <label for="branch_name">Branch Name <font color="#FF0000">*</font></label>
+                                     <input type="text" name="branch_name" id="branch_name" placeholder="Branch Name" class="form-control" required />
+                                </div>
+                            </form>
+                            <div id="msg_box"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
+                            <button type="button" class="btn btn-warning" id="resetButton"><i class="fa fa-undo-alt"></i> Reset</button>
+                            <button type="button" class="btn btn-info" id="saveButton"><i class="fa fa-check"></i> Submit</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+
+    </body>
+</html>
